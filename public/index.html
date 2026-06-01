@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Hub · 聊天室</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <!-- 登录 / 注册 -->
+  <div id="auth-screen" class="screen">
+    <div class="login-card auth-card">
+      <div class="logo">
+        <span class="logo-icon">💬</span>
+        <h1>Knowledge Hub</h1>
+        <p class="subtitle">登录或注册后进入聊天室</p>
+      </div>
+      <div class="auth-tabs">
+        <button type="button" id="auth-tab-login" class="auth-tab is-active">登录</button>
+        <button type="button" id="auth-tab-register" class="auth-tab">注册</button>
+      </div>
+
+      <div id="auth-login-panel">
+        <form id="auth-login-form">
+          <input type="text" id="login-account" placeholder="账号" maxlength="20" autocomplete="username" required />
+          <input type="password" id="login-password" placeholder="密码" autocomplete="current-password" required />
+          <button type="submit" class="auth-submit-btn">登录</button>
+        </form>
+        <p id="auth-login-error" class="error-msg hidden"></p>
+      </div>
+
+      <div id="auth-register-panel" class="hidden">
+        <form id="auth-register-form">
+          <input type="text" id="reg-account" placeholder="账号（3-20位）" maxlength="20" autocomplete="username" required />
+          <input type="text" id="reg-display-name" placeholder="聊天昵称" maxlength="20" required />
+          <input type="password" id="reg-password" placeholder="密码（至少6位）" autocomplete="new-password" required />
+          <input type="password" id="reg-password-confirm" placeholder="确认密码" autocomplete="new-password" required />
+          <div class="avatar-setup compact">
+            <div id="reg-avatar-preview" class="avatar-preview small">😀</div>
+            <div class="avatar-setup-actions">
+              <label class="upload-btn" for="reg-avatar-upload">上传头像</label>
+              <input type="file" id="reg-avatar-upload" accept="image/jpeg,image/png,image/gif,image/webp" hidden />
+            </div>
+          </div>
+          <div id="reg-avatar-options" class="avatar-options reg-avatar-options"></div>
+          <button type="submit" class="auth-submit-btn">注册并进入</button>
+        </form>
+        <p id="auth-register-error" class="error-msg hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聊天界面 -->
+  <div id="chat-screen" class="screen hidden">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-icon small">💬</span>
+        <span>Knowledge Hub</span>
+      </div>
+
+      <div class="online-section">
+        <h3>成员 <span id="online-count">0</span></h3>
+        <ul id="user-list"></ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <button type="button" id="sidebar-me-btn" class="sidebar-me" title="打开设置">
+          <div id="sidebar-avatar" class="sidebar-avatar">😀</div>
+          <div class="sidebar-me-info">
+            <span id="sidebar-username" class="sidebar-username">—</span>
+            <span id="sidebar-status-label" class="sidebar-status-label">在线</span>
+          </div>
+        </button>
+        <button type="button" id="profile-page-btn" class="icon-btn" aria-label="个人主页" title="个人主页">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </button>
+        <button type="button" id="settings-btn" class="icon-btn" aria-label="设置" title="设置">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <main class="chat-main" id="chat-main">
+      <header class="chat-header">
+        <h2>公共聊天室</h2>
+        <button type="button" id="settings-btn-mobile" class="icon-btn settings-btn-mobile" aria-label="设置" title="设置">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+          </svg>
+        </button>
+        <span class="status-dot"></span>
+        <span class="status-text">已连接</span>
+      </header>
+
+      <div id="drop-overlay" class="drop-overlay hidden">
+        <div class="drop-overlay-inner">
+          <span class="drop-icon">📁</span>
+          <p>松开鼠标发送文件</p>
+          <small>支持图片、文档、代码文件</small>
+        </div>
+      </div>
+
+      <div id="mention-toasts" class="mention-toasts"></div>
+
+      <div id="messages" class="messages"></div>
+      <div id="typing-indicator" class="typing-indicator hidden"></div>
+
+      <div id="reply-bar" class="reply-bar hidden">
+        <div class="reply-bar-content">
+          <span class="reply-bar-label">回复</span>
+          <span id="reply-bar-text" class="reply-bar-text"></span>
+        </div>
+        <button type="button" id="reply-cancel-btn" class="reply-cancel-btn" aria-label="取消回复">×</button>
+      </div>
+
+      <div id="attachment-preview" class="attachment-preview hidden">
+        <span id="attachment-preview-label"></span>
+        <button type="button" id="attachment-cancel-btn" aria-label="取消附件">×</button>
+      </div>
+
+      <form id="message-form" class="message-form">
+        <div class="input-toolbar">
+          <button type="button" id="emoji-toggle-btn" class="toolbar-btn" aria-label="表情" title="表情">😊</button>
+          <button type="button" id="file-attach-btn" class="toolbar-btn" aria-label="发送文件" title="发送文件">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+            </svg>
+          </button>
+          <input type="file" id="file-input" hidden multiple />
+        </div>
+        <div class="input-area">
+          <div id="emoji-panel" class="emoji-panel hidden">
+            <div class="emoji-tabs" id="emoji-tabs"></div>
+            <div class="emoji-grid" id="emoji-grid"></div>
+            <p class="emoji-hint">点击插入 · ☆ 收藏 · 图片右键可「收藏为表情」</p>
+          </div>
+          <div id="mention-popup" class="mention-popup hidden">
+            <ul id="mention-list"></ul>
+          </div>
+          <textarea
+            id="message-input"
+            placeholder="输入消息，@ 提及 · ```js 代码块 · 拖拽文件发送..."
+            maxlength="10000"
+            rows="1"
+            autocomplete="off"
+          ></textarea>
+        </div>
+        <button type="submit" id="send-btn" aria-label="发送">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <div id="msg-context-menu" class="context-menu hidden">
+    <button type="button" data-action="reply">↩ 回复</button>
+    <button type="button" data-action="copy">📋 复制</button>
+    <button type="button" data-action="save-sticker" class="hidden">⭐ 收藏为表情</button>
+  </div>
+
+  <!-- 设置面板 -->
+  <div id="settings-modal" class="settings-modal hidden" role="dialog" aria-labelledby="settings-title" aria-modal="true">
+    <div id="settings-overlay" class="settings-overlay"></div>
+    <div class="settings-dialog">
+      <div class="settings-header">
+        <h3 id="settings-title">设置</h3>
+        <button type="button" id="settings-close-btn" class="settings-close-btn" aria-label="关闭">×</button>
+      </div>
+      <div class="settings-body">
+        <nav class="settings-nav">
+          <button type="button" class="settings-nav-btn is-active" data-settings-tab="profile">聊天资料</button>
+          <button type="button" class="settings-nav-btn" data-settings-tab="status">在线状态</button>
+          <button type="button" class="settings-nav-btn" data-settings-tab="account">账号</button>
+        </nav>
+        <div class="settings-panels">
+          <section id="settings-profile" class="settings-panel">
+            <div class="settings-avatar-row">
+              <div id="my-avatar-preview" class="avatar-preview large"></div>
+              <div>
+                <label class="upload-btn" for="profile-avatar-upload">上传头像</label>
+                <p class="settings-hint">支持 JPG / PNG / GIF / WebP，最大 500KB</p>
+              </div>
+            </div>
+            <input type="file" id="profile-avatar-upload" accept="image/jpeg,image/png,image/gif,image/webp" hidden />
+            <label class="settings-field-label">或选择 emoji 头像</label>
+            <div class="avatar-picker compact">
+              <div id="profile-avatar-options" class="avatar-options"></div>
+            </div>
+            <label class="settings-field-label" for="profile-nickname">昵称</label>
+            <input type="text" id="profile-nickname" class="profile-input" maxlength="20" placeholder="输入昵称" />
+            <button type="button" id="profile-save-btn" class="profile-save-btn">保存资料</button>
+            <button type="button" id="open-profile-btn" class="profile-link-btn">编辑完整个人主页 →</button>
+            <p id="profile-error" class="profile-error hidden"></p>
+          </section>
+          <section id="settings-status" class="settings-panel hidden">
+            <p class="settings-desc">设置你的在线状态，其他成员可在成员列表中看到。</p>
+            <div class="status-options">
+              <label class="status-option">
+                <input type="radio" name="status" value="online" checked />
+                <span class="status-option-dot status-online"></span>
+                <span class="status-option-text">
+                  <strong>在线</strong>
+                  <small>可以正常接收消息</small>
+                </span>
+              </label>
+              <label class="status-option">
+                <input type="radio" name="status" value="away" />
+                <span class="status-option-dot status-away"></span>
+                <span class="status-option-text">
+                  <strong>离开</strong>
+                  <small>暂时不在，稍后回复</small>
+                </span>
+              </label>
+              <label class="status-option">
+                <input type="radio" name="status" value="busy" />
+                <span class="status-option-dot status-busy"></span>
+                <span class="status-option-text">
+                  <strong>忙碌</strong>
+                  <small>请勿打扰</small>
+                </span>
+              </label>
+            </div>
+          </section>
+            </div>
+          </section>
+          <section id="settings-account" class="settings-panel hidden">
+            <p class="settings-desc">当前登录账号信息</p>
+            <p class="account-info-line">账号：<strong id="settings-account-name">—</strong></p>
+            <button type="button" id="logout-btn" class="logout-btn">退出登录</button>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 个人主页 -->
+  <div id="profile-screen" class="screen hidden">
+    <div class="profile-page">
+      <header class="profile-page-header">
+        <button type="button" id="profile-back-btn" class="profile-back-btn">← 返回聊天</button>
+        <h2 id="profile-page-title">个人主页</h2>
+      </header>
+      <div class="profile-page-body">
+        <div class="profile-page-card">
+          <div id="profile-page-avatar" class="avatar-preview profile-page-avatar">😀</div>
+          <p id="profile-page-account" class="profile-page-account">@account</p>
+          <p id="profile-page-meta" class="profile-page-meta"></p>
+
+          <div id="profile-view-section" class="hidden">
+            <div class="profile-field">
+              <label>昵称</label>
+              <p id="profile-view-display-name" class="profile-view-value"></p>
+            </div>
+            <div class="profile-field">
+              <label>个人简介</label>
+              <p id="profile-view-bio" class="profile-view-value"></p>
+            </div>
+            <div class="profile-field">
+              <label>个人主页</label>
+              <a id="profile-page-homepage-link" class="profile-homepage-link hidden" href="#" target="_blank" rel="noopener"></a>
+              <p id="profile-view-no-homepage" class="profile-view-value muted">未设置</p>
+            </div>
+          </div>
+
+          <div id="profile-edit-section">
+            <label class="settings-field-label">头像</label>
+            <label class="upload-btn small" for="profile-page-avatar-upload">上传头像</label>
+            <input type="file" id="profile-page-avatar-upload" accept="image/jpeg,image/png,image/gif,image/webp" hidden />
+            <div id="profile-page-avatar-options" class="avatar-options reg-avatar-options"></div>
+
+            <label class="settings-field-label" for="profile-page-display-name">昵称</label>
+            <input type="text" id="profile-page-display-name" class="profile-input" maxlength="20" />
+
+            <label class="settings-field-label" for="profile-page-bio">个人简介</label>
+            <textarea id="profile-page-bio" class="profile-textarea" maxlength="200" placeholder="介绍一下你自己..."></textarea>
+
+            <label class="settings-field-label" for="profile-page-homepage">个人主页链接</label>
+            <input type="url" id="profile-page-homepage" class="profile-input" placeholder="https://example.com" />
+
+            <button type="button" id="profile-page-save" class="profile-save-btn">保存主页</button>
+            <p id="profile-page-error" class="profile-error hidden"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script src="/js/emoji.js"></script>
+  <script src="/js/code-render.js"></script>
+  <script src="/js/file-share.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/profile.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
